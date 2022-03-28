@@ -5,6 +5,9 @@ import { ProductList } from './styles';
 import { api } from '../../services/api';
 import { formatPrice } from '../../util/format';
 import { useCart } from '../../hooks/useCart';
+import ProductCard from '../../components/ProductCard'
+
+
 import axios from 'axios';
 
 interface Product {
@@ -24,12 +27,13 @@ interface CartItemsAmount {
 
 const Home = (): JSX.Element => {
   const [products, setProducts] = useState<ProductFormatted[]>([]);
-  // const { addProduct, cart } = useCart();
+  const { addProduct, cart } = useCart();
 
-  // const cartItemsAmount = cart.reduce((sumAmount, product) => {
-     // TODO
-  
-  // }, {} as CartItemsAmount)
+  const cartItemsAmount = cart.reduce((sumAmount: CartItemsAmount, product:Product) => {
+     //TODO
+     sumAmount[product.id] += 1;
+     return sumAmount;
+  }, {} as CartItemsAmount)
 
   useEffect(() => {
     async function loadProducts() {
@@ -39,13 +43,18 @@ const Home = (): JSX.Element => {
         response => response.data
       )
       .then(
-        data => data.forEach(function(element:ProductFormatted){
-            element.priceFormatted = formatPrice(element.price)
-          }
-        )
+        data => {data.forEach(function(element:ProductFormatted){
+              element.priceFormatted = formatPrice(element.price)
+            }
+          )
+          return data;
+        }
       )
       .then(
-        formattedData => setProducts(formattedData)
+        formattedData => {
+          setProducts(formattedData)
+          console.log('setting projects', products)
+        }
       )
       .catch(function(error){
         console.log(error)
@@ -53,32 +62,42 @@ const Home = (): JSX.Element => {
     }
 
     loadProducts();
-  }, [products]);
+  }, []);
 
   function handleAddProduct(id: number) {
     // TODO
   }
 
-  return (
-    <ProductList>
-      <li>
-        <img src="https://rocketseat-cdn.s3-sa-east-1.amazonaws.com/modulo-redux/tenis1.jpg" alt="Tênis de Caminhada Leve Confortável" />
-        <strong>Tênis de Caminhada Leve Confortável</strong>
-        <span>R$ 179,90</span>
-        <button
-          type="button"
-          data-testid="add-product-button"
-        // onClick={() => handleAddProduct(product.id)}
-        >
-          <div data-testid="cart-product-quantity">
-            <MdAddShoppingCart size={16} color="#FFF" />
-            {/* {cartItemsAmount[product.id] || 0} */} 2
-          </div>
 
-          <span>ADICIONAR AO CARRINHO</span>
-        </button>
-      </li>
+  return (
+
+      
+    <ProductList>
+      {products.map(function(product){
+        return(
+        <li>
+            <img src={product.image} />
+            <strong>{product.title}</strong>
+            <span>{product.priceFormatted}</span>
+            <button
+              type="button"
+              data-testid="add-product-button"
+              onClick={() => handleAddProduct(product.id)}
+            >
+              <div data-testid="cart-product-quantity">
+                <MdAddShoppingCart size={16} color="#FFF" />
+                {cartItemsAmount[product.id] || 0}
+              </div>
+
+              <span>ADICIONAR AO CARRINHO</span>
+            </button>
+          </li>
+          )
+        })
+      }
     </ProductList>
+    
+    
   );
 };
 
