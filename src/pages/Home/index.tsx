@@ -5,6 +5,7 @@ import { ProductList } from './styles';
 import { api } from '../../services/api';
 import { formatPrice } from '../../util/format';
 import { useCart } from '../../hooks/useCart';
+import axios from 'axios';
 
 interface Product {
   id: number;
@@ -22,20 +23,37 @@ interface CartItemsAmount {
 }
 
 const Home = (): JSX.Element => {
-  // const [products, setProducts] = useState<ProductFormatted[]>([]);
+  const [products, setProducts] = useState<ProductFormatted[]>([]);
   // const { addProduct, cart } = useCart();
 
   // const cartItemsAmount = cart.reduce((sumAmount, product) => {
-  //   // TODO
+     // TODO
+  
   // }, {} as CartItemsAmount)
 
   useEffect(() => {
     async function loadProducts() {
-      // TODO
+      // TODO      
+      axios.get('http://localhost:3333/products')
+      .then(
+        response => response.data
+      )
+      .then(
+        data => data.forEach(function(element:ProductFormatted){
+            element.priceFormatted = formatPrice(element.price)
+          }
+        )
+      )
+      .then(
+        formattedData => setProducts(formattedData)
+      )
+      .catch(function(error){
+        console.log(error)
+      })      
     }
 
     loadProducts();
-  }, []);
+  }, [products]);
 
   function handleAddProduct(id: number) {
     // TODO
