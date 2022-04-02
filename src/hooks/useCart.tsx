@@ -3,6 +3,8 @@ import { toast } from 'react-toastify';
 import { api } from '../services/api';
 import { Product, Stock } from '../types';
 
+import axios from 'axios';
+
 interface CartProviderProps {
   children: ReactNode;
 }
@@ -19,15 +21,22 @@ interface CartContextData {
   updateProductAmount: ({ productId, amount }: UpdateProductAmount) => void;
 }
 
+interface ProductFromList {
+  id: number;
+  title: string;
+  price: number;
+  image: string;
+}
+
 const CartContext = createContext<CartContextData>({} as CartContextData);
 
 export function CartProvider({ children }: CartProviderProps): JSX.Element {
   const [cart, setCart] = useState<Product[]>(() => {
-    // const storagedCart = Buscar dados do localStorage
+    const storagedCart = localStorage.getItem('@RocketShoes:cart');
 
-    // if (storagedCart) {
-    //   return JSON.parse(storagedCart);
-    // }
+    if (storagedCart) {
+      return JSON.parse(storagedCart);
+    }
 
     return [];
   });
@@ -35,7 +44,21 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
   const addProduct = async (productId: number) => {
     try {
       // TODO
-    } catch {
+      let foundProduct = cart.find(product => product.id === productId)
+      if(foundProduct === undefined){
+        axios.get('http://localhost:3333/products')
+        .then(response => response.data )
+        .then(response=> {
+          response.forEach( (e:Product) => {if(e.id == productId)return e})
+          //if not found
+          throw new Error('Erro na adição do produto');
+        })
+        .catch(e =>
+          toast.error(e.message)
+        )
+        
+      }
+    } catch(e) {
       // TODO
     }
   };

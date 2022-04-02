@@ -5,7 +5,6 @@ import { ProductList } from './styles';
 import { api } from '../../services/api';
 import { formatPrice } from '../../util/format';
 import { useCart } from '../../hooks/useCart';
-import ProductCard from '../../components/ProductCard'
 
 
 import axios from 'axios';
@@ -31,7 +30,9 @@ const Home = (): JSX.Element => {
 
   const cartItemsAmount = cart.reduce((sumAmount: CartItemsAmount, product:Product) => {
      //TODO
+     console.log(sumAmount[product.id])
      sumAmount[product.id] += 1;
+     console.log(sumAmount[product.id])
      return sumAmount;
   }, {} as CartItemsAmount)
 
@@ -50,12 +51,7 @@ const Home = (): JSX.Element => {
           return data;
         }
       )
-      .then(
-        formattedData => {
-          setProducts(formattedData)
-          console.log('setting projects', products)
-        }
-      )
+      .then(formattedData => setProducts(formattedData))
       .catch(function(error){
         console.log(error)
       })      
@@ -66,16 +62,15 @@ const Home = (): JSX.Element => {
 
   function handleAddProduct(id: number) {
     // TODO
+    addProduct(id)
   }
 
 
-  return (
-
-      
+  return (  
     <ProductList>
       {products.map(function(product){
         return(
-        <li>
+        <li key={product.id}>
             <img src={product.image} />
             <strong>{product.title}</strong>
             <span>{product.priceFormatted}</span>
