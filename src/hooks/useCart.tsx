@@ -32,11 +32,14 @@ const CartContext = createContext<CartContextData>({} as CartContextData);
 
 export function CartProvider({ children }: CartProviderProps): JSX.Element {
   const [cart, setCart] = useState<Product[]>(() => {
+    console.log("atualizando carrinho")
     const storagedCart = localStorage.getItem('@RocketShoes:cart');
+    console.log('ó o carrinho', storagedCart)
 
     if (storagedCart) {
       return JSON.parse(storagedCart);
     }
+
 
     return [];
   });
@@ -44,32 +47,64 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
   const addProduct = async (productId: number) => {
     try {
       // TODO
-      let foundProduct:any = cart.find(product => product.id === productId)
+
+      console.log("will find product on list", productId)
+      let foundProduct:(Product|undefined) = cart.find(product => product.id === productId)
+      console.log('look what i\'ve found!', foundProduct)
       if(foundProduct === undefined){
+        console.log("new product to cart")
         axios.get('http://localhost:3333/products')
         .then(response => response.data )
         .then(response=> {
           let found =  false;
+          let productToAdd:Product;
           response.forEach( (e:Product) => {
             if(e.id == productId){
               found = true;
-              return e
+              console.log('testando 3', e)
+              productToAdd = e
+              productToAdd.amount = 1;
+              console.log(productToAdd)
+              const updatedCart = [...cart, productToAdd]
+              
+              console.log('testando 4', updatedCart)
+              localStorage.setItem('@RocketShoes:cart', JSON.stringify(updatedCart));
+              setCart(updatedCart)
+              console.log("LOOK AT WHAT YOU DID TO CART!", cart)
+              
             }
           })
           if(!found)throw new Error('Erro na adição do produto');
         })
         .catch(e => toast.error(e.message)) 
       }else{
-        let stock:any 
-        stock = axios.get('http://localhost:3333/stock')
+        console.log("existing product on cart, updating...")
+        axios.get('http://localhost:3333/stock')
                 .then(response => response.data )
-                .then(stockArray => stockArray.find(
-                    (product:UpdateProductAmount) => product.productId === productId))
-                .then(product => {
-                  if(product === undefined)throw new Error('Erro na adição do produto');
-                  if(foundProduct.amount+1 > product.amount)throw new Error('Quantidade solicitada fora de estoque');
+                .then(function(stockArray:any){
+                    console.log("product id is?", productId)
 
+                    const found = stockArray.find(
+                    (product:UpdateProductAmount) => product.productId == productId)
+                    console.log("found it! ", found)
+                    return found;
+                  })
+                .then(productInStock => {
+                  
+                  if(productInStock === undefined)throw new Error('Erro na adição do produto');
+                  if(foundProduct!= undefined)
+                  if(foundProduct.amount+1 > productInStock.amount)throw new Error('Quantidade solicitada fora de estoque');
+                  const updatedCart = cart.map((product:any) => {
+                    if ((product:any) => product.id === productId){
+                      return {...product, amount: product.amount+1}
+                    }
+                    return product
+                  })
+                  setCart(updatedCart)
+                  console.log('testando', JSON.stringify(cart))
+                  localStorage.setItem('@RocketShoes:cart', JSON.stringify(cart));
                 })
+                .catch(e => toast.error(e.message))
           
       }
     } catch(e) {

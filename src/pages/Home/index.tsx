@@ -14,6 +14,7 @@ interface Product {
   title: string;
   price: number;
   image: string;
+  amount: number;
 }
 
 interface ProductFormatted extends Product {
@@ -30,9 +31,7 @@ const Home = (): JSX.Element => {
 
   const cartItemsAmount = cart.reduce((sumAmount: CartItemsAmount, product:Product) => {
      //TODO
-     console.log(sumAmount[product.id])
-     sumAmount[product.id] += 1;
-     console.log(sumAmount[product.id])
+     sumAmount[product.id] = product.amount
      return sumAmount;
   }, {} as CartItemsAmount)
 
