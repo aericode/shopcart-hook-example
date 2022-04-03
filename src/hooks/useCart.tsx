@@ -44,19 +44,33 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
   const addProduct = async (productId: number) => {
     try {
       // TODO
-      let foundProduct = cart.find(product => product.id === productId)
+      let foundProduct:any = cart.find(product => product.id === productId)
       if(foundProduct === undefined){
         axios.get('http://localhost:3333/products')
         .then(response => response.data )
         .then(response=> {
-          response.forEach( (e:Product) => {if(e.id == productId)return e})
-          //if not found
-          throw new Error('Erro na adição do produto');
+          let found =  false;
+          response.forEach( (e:Product) => {
+            if(e.id == productId){
+              found = true;
+              return e
+            }
+          })
+          if(!found)throw new Error('Erro na adição do produto');
         })
-        .catch(e =>
-          toast.error(e.message)
-        )
-        
+        .catch(e => toast.error(e.message)) 
+      }else{
+        let stock:any 
+        stock = axios.get('http://localhost:3333/stock')
+                .then(response => response.data )
+                .then(stockArray => stockArray.find(
+                    (product:UpdateProductAmount) => product.productId === productId))
+                .then(product => {
+                  if(product === undefined)throw new Error('Erro na adição do produto');
+                  if(foundProduct.amount+1 > product.amount)throw new Error('Quantidade solicitada fora de estoque');
+
+                })
+          
       }
     } catch(e) {
       // TODO
