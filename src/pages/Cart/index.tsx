@@ -18,11 +18,12 @@ interface Product {
 }
 
 const Cart = (): JSX.Element => {
-  // const { cart, removeProduct, updateProductAmount } = useCart();
+  const { cart, removeProduct, updateProductAmount } = useCart();
 
-  // const cartFormatted = cart.map(product => ({
-  //   // TODO
-  // }))
+  const cartFormatted = cart.map(product => ({
+    // TODO
+    
+  }))
   // const total =
   //   formatPrice(
   //     cart.reduce((sumTotal, product) => {
@@ -32,6 +33,7 @@ const Cart = (): JSX.Element => {
 
   function handleProductIncrement(product: Product) {
     // TODO
+  
   }
 
   function handleProductDecrement(product: Product) {
@@ -102,6 +104,9 @@ const Cart = (): JSX.Element => {
             </td>
           </tr>
         </tbody>
+
+
+
       </ProductTable>
 
       <footer>
