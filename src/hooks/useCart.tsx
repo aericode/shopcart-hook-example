@@ -103,6 +103,7 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
       if(foundProduct.amount <= 1)throw new Error();
       let updatedCart = cart.map((product:any) => 
         (product.id === productId)?{...product, amount: product.amount-1}:product)
+
       setCart(updatedCart)
       localStorage.setItem('@RocketShoes:cart', JSON.stringify(updatedCart));
     } catch {
