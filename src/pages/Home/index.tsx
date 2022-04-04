@@ -61,8 +61,7 @@ const Home = (): JSX.Element => {
 
   function handleAddProduct(id: number) {
     // TODO
-    //addProduct(id)
-    updateProductAmount({2,2});
+    addProduct(id)
   }
 
 
