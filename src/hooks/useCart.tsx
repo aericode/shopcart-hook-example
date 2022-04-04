@@ -82,33 +82,29 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
         axios.get('http://localhost:3333/stock')
                 .then(response => response.data )
                 .then(function(stockArray:any){
-                    console.log("product id is?", productId)
-
                     const found = stockArray.find(
-                    (product:UpdateProductAmount) => product.productId == productId)
-                    console.log("found it! ", found)
+                    (product:any) => product.id == productId)
                     return found;
                   })
                 .then(productInStock => {
                   
                   if(productInStock === undefined)throw new Error('Erro na adição do produto');
-                  if(foundProduct!= undefined)
+                  if(foundProduct !== undefined)
                   if(foundProduct.amount+1 > productInStock.amount)throw new Error('Quantidade solicitada fora de estoque');
-                  const updatedCart = cart.map((product:any) => {
-                    if ((product:any) => product.id === productId){
-                      return {...product, amount: product.amount+1}
-                    }
-                    return product
-                  })
+                  const updatedCart = cart.map((product:any) => 
+                    (product.id === productId)?{...product, amount: product.amount+1}:product
+                  )
                   setCart(updatedCart)
-                  console.log('testando', JSON.stringify(cart))
-                  localStorage.setItem('@RocketShoes:cart', JSON.stringify(cart));
+                  console.log('testando', JSON.stringify(updatedCart))
+                  localStorage.setItem('@RocketShoes:cart', JSON.stringify(updatedCart));
+                  
                 })
                 .catch(e => toast.error(e.message))
           
       }
     } catch(e) {
       // TODO
+      toast.error("erro inesperado")
     }
   };
 
