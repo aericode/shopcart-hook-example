@@ -115,9 +115,31 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
     amount,
   }: UpdateProductAmount) => {
     try {
-      // TODO
+      let foundProduct:(Product|undefined) = cart.find(product => product.id === productId)
+      if(foundProduct === undefined)throw Error ('Erro na alteração de quantidade do produto');
+      axios.get('http://localhost:3333/stock')
+            .then(response => response.data )
+            .then(function(stockArray:any){
+                const found = stockArray.find(
+                (product:any) => product.id == productId)
+                return found;
+              })
+            .then(productInStock => {
+              
+              if(productInStock === undefined)throw new Error('Erro na alteração de quantidade do produto');
+              if(foundProduct !== undefined)
+              if(amount > productInStock.amount)throw new Error('Quantidade solicitada fora de estoque'); 
+              const updatedCart = cart.map((product:any) => 
+                (product.id === productId)?{...product, amount: amount}:product) 
+              setCart(updatedCart)
+              localStorage.setItem('@RocketShoes:cart', JSON.stringify(updatedCart));
+              
+            })
+            .catch(e => toast.error(e.message))
+        
     } catch {
       // TODO
+      toast.error("erro inesperado")
     }
   };
 
