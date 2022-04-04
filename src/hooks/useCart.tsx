@@ -18,6 +18,7 @@ interface CartContextData {
   cart: Product[];
   addProduct: (productId: number) => Promise<void>;
   removeProduct: (productId: number) => void;
+  deleteProduct: (productId: number) => void;
   updateProductAmount: ({ productId, amount }: UpdateProductAmount) => void;
 }
 
@@ -99,16 +100,27 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
       const foundProduct:(Product|undefined) = cart.find(product => product.id === productId)
       if(foundProduct === undefined)throw new Error();
       if(foundProduct!== undefined)
-      if(foundProduct.amount === 0)throw new Error();
+      if(foundProduct.amount <= 1)throw new Error();
       let updatedCart = cart.map((product:any) => 
         (product.id === productId)?{...product, amount: product.amount-1}:product)
-      updatedCart = updatedCart.filter((product:any) => product.amount !== 0)
       setCart(updatedCart)
       localStorage.setItem('@RocketShoes:cart', JSON.stringify(updatedCart));
     } catch {
       toast.error('Erro na remoção do produto');
     }
   };
+
+  const deleteProduct = (productId: number) => {
+    try{
+      const foundProduct:(Product|undefined) = cart.find(product => product.id === productId)
+        if(foundProduct === undefined)throw new Error();
+      let updatedCart:any = cart.filter((product:any) => product.id !== productId)
+      setCart(updatedCart)
+      localStorage.setItem('@RocketShoes:cart', JSON.stringify(updatedCart));
+    }catch{
+      toast.error('Erro na exclusão do produto');
+    }
+  }
 
   const updateProductAmount = async ({
     productId,
@@ -145,7 +157,7 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
 
   return (
     <CartContext.Provider
-      value={{ cart, addProduct, removeProduct, updateProductAmount }}
+      value={{ cart, addProduct, removeProduct, deleteProduct, updateProductAmount }}
     >
       {children}
     </CartContext.Provider>
